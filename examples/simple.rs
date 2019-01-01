@@ -18,8 +18,8 @@ fn main() {
             let mut draw = app.draw();
             let cols = draw.columns();
             let rows = draw.rows();
-            let col = counter / rows;
-            let row = counter % rows;
+            let col = counter % cols;
+            let row = counter / cols;
             draw.set(row, col, char!('.', Color::Default, Color::Red));
             counter = (counter + 1) % (cols * rows);
         }

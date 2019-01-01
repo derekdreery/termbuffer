@@ -9,15 +9,15 @@ pub(crate) struct Screen {
 }
 
 impl Screen {
-    pub(crate) fn new(width: usize, height: usize) -> Self {
+    pub(crate) fn new(rows: usize, cols: usize) -> Self {
         Screen {
-            previous: Frame::new(width, height),
-            next: Frame::new(width, height),
+            previous: Frame::new(rows, cols),
+            next: Frame::new(rows, cols),
         }
     }
-    pub(crate) fn prepare_next_frame(&mut self, width: usize, height: usize) {
+    pub(crate) fn prepare_next_frame(&mut self, rows: usize, cols: usize) {
         mem::swap(&mut self.next, &mut self.previous);
-        self.next.reset(width, height);
+        self.next.reset(rows, cols);
     }
 
     /// Render the frame to the terminal
@@ -39,7 +39,7 @@ impl Screen {
         assert!(self.next.rows < u16::max_value().into(), "rows must fit in u16");
         for row in 0..self.next.rows {
             for col in 0..self.next.cols {
-                write!(writer, "{}", Goto((row as u16) + 1, (col as u16) + 1))?;
+                write!(writer, "{}", Goto((col as u16) + 1, (row as u16) + 1))?; // checked col then row
                 let current = self.next.get(row, col);
                 // Change color if we need to.
                 if let Some((prev_row, prev_col)) = self.next.prev_row_col(row, col) {
@@ -76,7 +76,7 @@ impl Screen {
                 if next == prev {
                     continue
                 }
-                write!(writer, "{}", Goto((row as u16) + 1, (col as u16) + 1))?;
+                write!(writer, "{}", Goto((col as u16) + 1, (row as u16) + 1))?;
                 // Change color if we need to.
                 if next.color_fg != prev_fg {
                     next.write_fg(writer)?;
@@ -138,12 +138,12 @@ impl Frame {
     /// Will panic if the row or column is out of bounds.
     pub fn set(&mut self, row: usize, col: usize, ch: Char) {
         self.check_dims(row, col);
-        self.buffer[col * self.rows + row] = ch;
+        self.buffer[row * self.cols + col] = ch;
     }
 
     pub fn get(&self, row: usize, col: usize) -> Char {
         self.check_dims(row, col);
-        self.buffer[col * self.rows + row]
+        self.buffer[row * self.cols + col]
     }
 
     fn prev_row_col(&self, row: usize, col: usize) -> Option<(usize, usize)> {

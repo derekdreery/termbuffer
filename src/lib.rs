@@ -29,9 +29,9 @@ impl App {
     }
 
     pub fn draw<'a>(&'a mut self) -> Draw<'a> {
-        let (width, height) = terminal_size().unwrap();
-        let (width, height) = (width as usize, height as usize);
-        self.screen.prepare_next_frame(width, height);
+        let (cols, rows) = terminal_size().unwrap();
+        let (cols, rows) = (cols as usize, rows as usize);
+        self.screen.prepare_next_frame(rows, cols);
         Draw {
             output: &mut self.output,
             screen: &mut self.screen
@@ -65,13 +65,13 @@ impl AppBuilder {
         let mut output = io::stdout().into_raw_mode()?;
         write!(output, "{}{}", clear::All, cursor::Hide)?;
         let mut input = async_stdin().events();
-        let (width, height) = terminal_size()?;
-        let (width, height) = (width as usize, height as usize);
+        let (cols, rows) = terminal_size()?;
+        let (cols, rows) = (cols as usize, rows as usize);
         output.flush()?;
         Ok(App {
             input,
             output,
-            screen: screen::Screen::new(width, height),
+            screen: screen::Screen::new(cols, rows),
         })
     }
 }
