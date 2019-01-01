@@ -1,6 +1,6 @@
-use termbuffer::{App, Event, Key, char, Color};
-use std::time::{Duration, Instant};
 use std::thread;
+use std::time::{Duration, Instant};
+use termbuffer::{char, App, Color, Event, Key};
 
 const FRAME_TIME: Duration = Duration::from_millis(1000 / 60); // 60 fps
 
@@ -28,7 +28,7 @@ fn main() {
                 Event::Key(Key::Char('q')) => {
                     shutdown = true;
                 }
-                _ => ()
+                _ => (),
             }
         }
         let time_end = Instant::now();

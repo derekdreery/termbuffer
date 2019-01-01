@@ -1,5 +1,4 @@
 use std::io::{self, Write};
-use std::ops::{Deref, DerefMut};
 use std::mem;
 
 #[derive(Debug)]
@@ -32,11 +31,12 @@ impl Screen {
     }
 
     pub(crate) fn redraw(&self, writer: &mut impl Write) -> io::Result<()> {
-        use termion::{
-            cursor::{Right, Goto},
-        };
+        use termion::cursor::Goto;
         write!(writer, "{}", termion::clear::All)?;
-        assert!(self.next.rows < u16::max_value().into(), "rows must fit in u16");
+        assert!(
+            self.next.rows < u16::max_value().into(),
+            "rows must fit in u16"
+        );
         for row in 0..self.next.rows {
             for col in 0..self.next.cols {
                 write!(writer, "{}", Goto((col as u16) + 1, (row as u16) + 1))?; // checked col then row
@@ -61,10 +61,11 @@ impl Screen {
     }
 
     pub(crate) fn redraw_diff(&self, writer: &mut impl Write) -> io::Result<()> {
-        use termion::{
-            cursor::{Right, Goto},
-        };
-        assert!(self.next.rows < u16::max_value().into(), "rows must fit in u16");
+        use termion::cursor::Goto;
+        assert!(
+            self.next.rows < u16::max_value().into(),
+            "rows must fit in u16"
+        );
         let mut prev_fg = Color::default();
         let mut prev_bg = Color::default();
         prev_fg.write_fg(writer)?;
@@ -74,7 +75,7 @@ impl Screen {
                 let next = self.next.get(row, col);
                 let prev = self.previous.get(row, col);
                 if next == prev {
-                    continue
+                    continue;
                 }
                 write!(writer, "{}", Goto((col as u16) + 1, (row as u16) + 1))?;
                 // Change color if we need to.
@@ -93,12 +94,11 @@ impl Screen {
     }
 }
 
-
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Frame {
     rows: usize,
     cols: usize,
-    buffer: Vec<Char>
+    buffer: Vec<Char>,
 }
 
 impl Frame {
@@ -106,7 +106,7 @@ impl Frame {
         Frame {
             rows,
             cols,
-            buffer: vec![Default::default(); rows * cols]
+            buffer: vec![Default::default(); rows * cols],
         }
     }
 
@@ -159,10 +159,16 @@ impl Frame {
 
     fn check_dims(&self, row: usize, col: usize) {
         if row >= self.rows {
-            panic!("Row {} is out of bounds (number of rows: {})", row, self.rows);
+            panic!(
+                "Row {} is out of bounds (number of rows: {})",
+                row, self.rows
+            );
         }
         if col >= self.cols {
-            panic!("Column {} is out of bounds (number of columns: {})", col, self.cols);
+            panic!(
+                "Column {} is out of bounds (number of columns: {})",
+                col, self.cols
+            );
         }
     }
 }
@@ -197,7 +203,7 @@ impl Default for Char {
         Char {
             glyph: ' ',
             color_fg: Color::default(),
-            color_bg: Color::default()
+            color_bg: Color::default(),
         }
     }
 }

@@ -40,8 +40,8 @@ fn main() {
             let cols = draw.columns();
             let rows = draw.rows();
             // Math to convert counter to position.
-            let col = counter / rows;
-            let row = counter % rows;
+            let row = counter / cols;
+            let col = counter % cols;
             // We set all the characters we want.
             draw.set(row, col, char!('.', Color::Default, Color::Red));
             counter = (counter + 1) % (cols * rows);

@@ -1,19 +1,16 @@
-
+pub use crate::screen::{Char, Color, Frame};
 use std::{
-    io::{self, Read, Write},
-    thread,
-    time::{Instant, Duration},
+    io::{self, Write},
     ops::{Deref, DerefMut},
 };
-use termion::{
-    raw::IntoRawMode,
-    input::{TermRead, Events},
-    terminal_size, async_stdin, clear, cursor,
-    raw::RawTerminal,
-    AsyncReader,
-};
-pub use crate::screen::{Frame, Char, Color};
 pub use termion::event::{Event, Key, MouseButton, MouseEvent};
+use termion::{
+    async_stdin, clear, cursor,
+    input::{Events, TermRead},
+    raw::IntoRawMode,
+    raw::RawTerminal,
+    terminal_size, AsyncReader,
+};
 
 mod screen;
 
@@ -34,11 +31,11 @@ impl App {
         self.screen.prepare_next_frame(rows, cols);
         Draw {
             output: &mut self.output,
-            screen: &mut self.screen
+            screen: &mut self.screen,
         }
     }
 
-    pub fn events<'a>(&'a mut self) -> &'a mut (impl Iterator<Item=io::Result<Event>> + 'a) {
+    pub fn events<'a>(&'a mut self) -> &'a mut (impl Iterator<Item = io::Result<Event>> + 'a) {
         &mut self.input
     }
 }
@@ -47,24 +44,26 @@ impl Drop for App {
     fn drop(&mut self) {
         use termion::color;
         // The best we can do here is to ignore errors.
-        let _ = write!(self.output, "{}{}{}{}{}",
-                       color::Fg(color::Reset),
-                       color::Bg(color::Reset),
-                       clear::All,
-                       cursor::Goto(1, 1),
-                       cursor::Show);
+        let _ = write!(
+            self.output,
+            "{}{}{}{}{}",
+            color::Fg(color::Reset),
+            color::Bg(color::Reset),
+            clear::All,
+            cursor::Goto(1, 1),
+            cursor::Show
+        );
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct AppBuilder {
-}
+pub struct AppBuilder {}
 
 impl AppBuilder {
     pub fn build(self) -> io::Result<App> {
         let mut output = io::stdout().into_raw_mode()?;
         write!(output, "{}{}", clear::All, cursor::Hide)?;
-        let mut input = async_stdin().events();
+        let input = async_stdin().events();
         let (cols, rows) = terminal_size()?;
         let (cols, rows) = (cols as usize, rows as usize);
         output.flush()?;
@@ -78,8 +77,7 @@ impl AppBuilder {
 
 impl Default for AppBuilder {
     fn default() -> AppBuilder {
-        AppBuilder {
-        }
+        AppBuilder {}
     }
 }
 
@@ -107,4 +105,3 @@ impl<'a> Drop for Draw<'a> {
         self.output.flush().unwrap();
     }
 }
-
